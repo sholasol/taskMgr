@@ -9,6 +9,7 @@ Step 2: Configure .env file
 Step 3: Run npm install && npm run dev
 
 Step 4: Rum php artisan migrate --seed
+    -Or Import the taskmgr.sql located in the database directory
 
 Step 5: http://localhost:8000
 
