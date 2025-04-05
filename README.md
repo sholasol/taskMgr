@@ -1,3 +1,34 @@
+<h1>Application Setup Instruction</h1>
+
+Step 1: Upload and unzip taskMgr zipped file into the web server
+
+Step 2: Configure .env file 
+- Database Name: taskmgr
+- Password: Use your default server configuration 
+
+Step 3: Run npm install && npm run dev
+
+Step 4: Rum php artisan migrate --seed
+
+Step 5: http://localhost:8000
+
+ - Email: admin@admin.com
+ - Password: password
+
+Step 6: Add New Project
+
+Step 7: Add tasks to the project
+
+Step 8: View project tasks
+
+Step 0: Drag and drop the tasks to reorder the task priority
+
+
+
+
+
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
