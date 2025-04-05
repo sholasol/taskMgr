@@ -6,14 +6,14 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class ProjectController extends Controller
+class DashboardController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $projects = Project::where('user_id', Auth::id())->latest();
+        $projects = Project::where('user_id', Auth::id())->latest()->get();
         return view('dashboard.index', compact('projects'));
     }
 
@@ -32,28 +32,20 @@ class ProjectController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_date' => 'required',
-            'end_date'   => 'required'
         ]);
 
         Project::create([
             'name' => $request->name,
             'user_id' => Auth::id(),
-            'description' => $request->description,
-            'start_date ' => $request->start_date,
-            'end_date' => $request->end_date,
         ]);
 
-        
-        sweetalert()->success('Project created Successfully');
         return redirect()->route('dashboard.index');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Project $project)
+    public function show(string $id)
     {
         //
     }
@@ -61,7 +53,7 @@ class ProjectController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Project $project)
+    public function edit(string $id)
     {
         //
     }
@@ -69,7 +61,7 @@ class ProjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Project $project)
+    public function update(Request $request, string $id)
     {
         //
     }
@@ -77,7 +69,7 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Project $project)
+    public function destroy(string $id)
     {
         //
     }

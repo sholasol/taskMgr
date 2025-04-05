@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -27,7 +29,22 @@ class AuthController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //dd($request->all());
+
+        $validated  = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|min:8',
+        ]);
+
+        $credentials = $request->only('email', 'password');
+        
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate(); //regenerate session
+
+            return redirect()->intended(route('dashboard.index'));
+        }
+
+        return back()->withErrors('Invalid credentials or account does not exist');
     }
 
     /**
@@ -57,8 +74,16 @@ class AuthController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        Auth::guard('web')->logout();
+        // Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
+
 }
