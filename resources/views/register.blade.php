@@ -34,7 +34,7 @@
 
       <div class="d-flex justify-content-center align-items-center vh-100">
         <form class="p-4 rounded shadow-lg" style="width: 100%; max-width: 400px; background-color: #f8f9fa;">
-          <h3 class="text-center mb-4">Login</h3>
+          <h3 class="text-center mb-4">Register Here</h3>
           <div class="mb-3">
         <label for="exampleInputEmail1" class="form-label">Email address</label>
         <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter your email">
