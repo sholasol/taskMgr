@@ -26,14 +26,14 @@
                         </div>
                         <div class="mb-3">
                             <label for="start" class="form-label">Start Date</label>
-                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            <input type="date" class="form-control" id="start_date" min="{{ date('Y-m-d') }}" name="start_date" required>
                             @error('start_date')
                                 <p class="text-danger">{{ $messgae }}</p>
                             @enderror
                         </div>
                         <div class="mb-3">
                             <label for="start" class="form-label">End Date</label>
-                            <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            <input type="date" class="form-control" min="{{ date('Y-m-d') }}" id="end_date" name="end_date" required>
                             @error('end_date')
                                 <p class="text-danger">{{ $messgae }}</p>
                             @enderror

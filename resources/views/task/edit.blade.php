@@ -38,6 +38,17 @@
                                     <input type="text" class="form-control" id="name" name="name" value="{{ $task->name}}" required>
                                 </div>
                                
+                                <div class="mb-3">
+                                    <label for="project_id" class="form-label">Priority</label>
+                                    <select name="priority" id="priority" class="form-select" required>
+                                            <option value="3" >High</option>
+                                            <option value="2">Medium</option>
+                                            <option value="1">Low</option>
+                                    </select>
+                                    @error('priority')
+                                        <p class="text-danger">{{ $message }}</p>
+                                    @enderror
+                                </div>
 
                                 <div class="mb-3">
                                     <label for="comment" class="form-label">Comment</label>

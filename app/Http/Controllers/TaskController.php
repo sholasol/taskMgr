@@ -14,27 +14,37 @@ class TaskController extends Controller
      */
     public function index(Request $request)
     {
+        $userId = Auth::id();
         $projectId = $request->query('project_id');
-        
-        // Get only projects owned by the current user
-        $projects = Project::where('user_id', Auth::id())->get();
-        
-        // Set up the task query
-        $query = Task::query()
-            ->orderBy('priority')
-            ->whereHas('project', function($q) {
-                $q->where('user_id', Auth::id());
-            });
-        
-        // Filter by project if requested
+
+        $projects = Project::where('user_id', $userId)->get();
+
+        // If no project_id is provided, default to the first project
+        if (!$projectId && $projects->isNotEmpty()) {
+            $projectId = $projects->first()->id;
+        }
+
+        $query = Task::whereHas('project', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })->orderBy('priority');
+
         if ($projectId) {
             $query->where('project_id', $projectId);
+        } else {
+            // If no projects exist, $tasks will be empty
+            $tasks = collect();
+            return view('task.index', compact('tasks', 'projects', 'projectId'));
         }
-        
+
         $tasks = $query->get();
-        
+
         return view('task.index', compact('tasks', 'projects', 'projectId'));
     }
+
+
+
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -53,6 +63,7 @@ class TaskController extends Controller
             'name' => 'required|string|max:255',
             'project_id' => 'required|exists:projects,id',
             'comment'  => 'nullable|string',
+            'priority'  => 'required|numeric',
         ]);
 
         // Verify user owns the project
@@ -62,11 +73,11 @@ class TaskController extends Controller
         }
 
         // Get the highest priority and add 1 for the new task
-        $maxPriority = Task::where('project_id', $request->project_id)->max('priority') ?? 0;
-        
+        // $maxPriority = Task::where('project_id', $request->project_id)->max('priority') ?? 0;
+
         Task::create([
             'name' => $request->name,
-            'priority' => $maxPriority + 1,
+            'priority' => $request->priority,
             'project_id' => $request->project_id,
             'comment'    => $request->comment,
         ]);
@@ -91,29 +102,44 @@ class TaskController extends Controller
         return view('task.edit', compact('task', 'project'));
     }
 
+    /**
+     * Update task order via drag-and-drop
+     */
     public function updateOrder(Request $request)
     {
-        $tasks = $request->input('tasks', []);
-        $projectId = null;
-        
-        foreach ($tasks as $order => $id) {
-            $task = Task::findOrFail($id);
-            
-            // Verify user owns the project this task belongs to
-            if ($task->project->user_id !== Auth::id()) {
-                abort(403);
+        $taskIds = $request->input('tasks', []);
+
+        if (empty($taskIds)) {
+            return response()->json(['success' => false, 'message' => 'No tasks provided'], 400);
+        }
+
+        // Fetch tasks and validate
+        $tasks = Task::whereIn('id', $taskIds)->get();
+        if ($tasks->count() !== count($taskIds)) {
+            return response()->json(['success' => false, 'message' => 'One or more task IDs are invalid'], 400);
+        }
+
+        // Verify project consistency and authorization
+        $projectId = $tasks->first()->project_id;
+        $userId = Auth::id();
+
+        foreach ($tasks as $task) {
+            $taskProjectId = (int) $task->project_id;
+
+            if (!$task->project || $task->project->user_id !== $userId) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized access to project'], 403);
             }
-            
-            $task->priority = $order + 1;
-            $task->save();
-            
-            if ($projectId === null) {
-                $projectId = $task->project_id;
+            if ($task->project_id !== $projectId) {
+                return response()->json(['success' => false, 'message' => 'Tasks must belong to the same project'], 400);
             }
         }
-        
-        sweetalert()->success('Task reordered Successfully');
-        return response()->json(['success' => true]);
+
+        // Update priorities based on new order
+        foreach ($taskIds as $order => $id) {
+            Task::where('id', $id)->update(['priority' => $order + 1]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Tasks reordered successfully']);
     }
 
     /**
@@ -154,8 +180,8 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-         // Verify user owns the project this task belongs to
-         if ($task->project->user_id !== Auth::id()) {
+        // Verify user owns the project this task belongs to
+        if ($task->project->user_id !== Auth::id()) {
             abort(403);
         }
 
